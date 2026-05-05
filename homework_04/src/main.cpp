@@ -124,12 +124,49 @@ namespace {
                 << ") = " << next.y << "\n"
                 << "      theta: " << prev.theta << " + " << dtheta
                 << "  = " << next.theta << "\n";
-            log << "  => pose: (" << next.x << ", " << next.y
+            log << "  => location: (" << next.x << ", " << next.y
                 << ", " << next.theta << ")\n";
         }
         return next;
     }
+    
+    void print_step(long timestamp_ms, const LocationOfRobot& location) {
+    std::cout << timestamp_ms << ' '
+        << std::fixed << std::setprecision(6)
+        << location.x << ' ' << location.y << ' ' << location.theta << '\n';
+    }
+    
+    void print_header(const RobotParams& p, const char* input_path) {
+        auto& log = std::cerr;
+        log << std::fixed << std::setprecision(6);
+        log << "============================================================\n";
+        log << " Wheel odometry — verbose trace\n";
+        log << "============================================================\n";
+        log << " input file:           " << input_path << "\n";
+        log << " ticks_per_revolution: " << p.ticks_per_revolution << "\n";
+        log << " wheel_radius_m:       " << p.wheel_radius_m << "\n";
+        log << " wheelbase_m:          " << p.wheelbase_m << "\n";
+        log << " distance_per_tick:    " << p.distance_per_tick() << " m/tick\n";
+        log << " initial location:         (0, 0, 0)\n";
+        log << "============================================================\n";
+    }
 
+    void print_summary(const LocationOfRobot& final_location, int steps) {
+        auto& log = std::cerr;
+        log << "\n============================================================\n";
+        log << " Done. Steps processed: " << steps << "\n";
+        log << " Final location: x=" << final_location.x
+            << "  y=" << final_location.y
+            << "  theta=" << final_location.theta << " rad"
+            << " (" << (final_location.theta * 180.0 / M_PI) << " deg)\n";
+        log << "============================================================\n";
+    }
+
+    void print_usage(const char* prog) {
+        std::cerr << "Usage: " << prog << " [--quiet] <input_file>\n"
+            << "  By default prints calculation steps to stderr.\n"
+            << "  Use --quiet to disable verbose tracing.\n";
+    }
 }
 
 int main(int argc, char** argv) {
