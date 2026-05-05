@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Скрипт виконується на host-системі (macOS, Linux, WSL2) до старту
+# контейнера. Тут створюються host-side файли, які потім монтуються
+# у devcontainer.
+DEVCONTAINER_DATA_ON_HOST="${HOME}/.devcontainers/$(basename "${PWD}")"
+mkdir -p "${DEVCONTAINER_DATA_ON_HOST}"
+touch "${DEVCONTAINER_DATA_ON_HOST}/.bash_history"
+
+# ~/.ssh має існувати до bind mount з devcontainer.json. На свіжих машинах
+# SSH ключів може ще не бути, і без цієї директорії container start падає.
+[ -d "${HOME}/.ssh" ] || mkdir -m 700 "${HOME}/.ssh"

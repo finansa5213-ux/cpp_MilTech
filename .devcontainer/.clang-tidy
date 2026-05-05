@@ -1,0 +1,52 @@
+# clang-tidy використовується як static analysis шар для C++ коду.
+# Набір перевірок навмисно широкий, але не всі warning-и є помилками:
+# частину сигналу студенти мають навчитися читати поступово.
+Checks: >
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  -readability-avoid-const-params-in-decls,
+  -readability-function-cognitive-complexity,
+  misc-unused-using-decls,
+
+# Аналізувати лише код домашніх робіт і типові source/include директорії,
+# а не системні headers або сторонні бібліотеки.
+HeaderFilterRegex: '(^|/)(homework_[0-9]+|include|src)/'
+
+# Помилки analyzer/core-guidelines/modernize мають ламати перевірку.
+# Readability і performance лишаються попередженнями, щоб не блокувати
+# навчальні ітерації надто рано.
+WarningsAsErrors: clang-analyzer-*,
+  cppcoreguidelines-*,
+  modernize-*,
+
+# Naming rules формують один стиль для прикладів курсу.
+CheckOptions:
+  - key: readability-identifier-naming.FunctionCase
+    value: lower_case
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.ConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstantPrefix
+    value: k
+  - key: readability-identifier-naming.LocalVariableCase
+    value: lower_case
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key: readability-identifier-naming.MemberCase
+    value: lower_case
+  - key: readability-identifier-naming.MemberSuffix
+    value: _
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: _
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase

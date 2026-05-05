@@ -1,0 +1,17 @@
+# clangd працює як language server у VS Code.
+# Основна інформація про include paths і compile flags береться з
+# compile_commands.json, який генерує root CMakeLists.txt.
+InlayHints:
+  Enabled: Yes
+  # Імена параметрів у викликах не показуються, щоб не перевантажувати
+  # екран на простих прикладах.
+  ParameterNames: No
+  # Типи, виведені через auto, корисно бачити під час навчання C++.
+  DeducedTypes: Yes
+
+# clang-tidy конфіг лежить у repo/container, але diagnostics вимкнено до
+# заняття 2.6, де static analysis буде окремою темою.
+Diagnostics:
+  ClangTidy:
+    Remove:
+      - '*'

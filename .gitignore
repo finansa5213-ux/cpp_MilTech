@@ -1,0 +1,33 @@
+# Директорії збірки та локальний output мають відтворюватися з CMake.
+build/
+build-*/
+out/
+
+# CMake генерує ці файли при in-source або ручних локальних збірках.
+CMakeCache.txt
+CMakeFiles/
+CTestTestfile.cmake
+Makefile
+cmake_install.cmake
+compile_commands.json
+install_manifest.txt
+_deps/
+
+# Мінімальний набір compiled/debug артефактів для C++ прикладів.
+*.d
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.dSYM/
+*.pdb
+core
+core.*
+
+# Метадані операційної системи не є частиною навчального репозиторію.
+.DS_Store
+Thumbs.db

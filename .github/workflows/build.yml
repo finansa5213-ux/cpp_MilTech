@@ -1,0 +1,58 @@
+# GitHub Actions workflow: збірка проєкту через репівський devcontainer.
+#
+# Ключова ідея: CI використовує ТОЙ САМИЙ Dockerfile що й локально у
+# VS Code. Інакше "works on my machine" виникає постійно: локальний
+# devcontainer має одні версії тулів, CI runner інші. Тут вони однакові.
+
+name: Build
+
+# Тригери:
+# - push.branches: [main] - запускаємо тільки при push у main (тобто
+#   при merge PR). Обмеження важливе: без нього push + pull_request
+#   запускали б одну й ту саму збірку двічі на кожен update PR.
+# - pull_request: запускаємо при відкритті PR і кожному update гілки.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    # ubuntu-latest - загальний GitHub runner з preinstalled Docker і
+    # актуальною Ubuntu. Для нашого випадку (build всередині
+    # devcontainer-а) специфічний runner не потрібен.
+    runs-on: ubuntu-latest
+
+    steps:
+      # Стандартний checkout коду. v4 - поточна стабільна major.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # devcontainers/ci - офіційний action від Microsoft, який запускає
+      # build всередині devcontainer-а. Послідовність:
+      #
+      # 1. Читає .devcontainer/devcontainer.json.
+      # 2. Підставляє ${localEnv:USER} і ${localEnv:HOME} зі змінних
+      #    середовища runner-а (на ubuntu-latest це `runner` і
+      #    `/home/runner`).
+      # 3. Будує Docker image з Dockerfile, передаючи підставлені args.
+      # 4. Монтує checkout у workspaceFolder.
+      # 5. Виконує runCmd від імені remoteUser.
+      #
+      # CMake preset debug тримає локальну і CI-збірку в одному місці:
+      # build/debug. Це також збігається з clangd compile_commands і
+      # VS Code debug launch config. ARM64 preset додатково перевіряє,
+      # що demo-код можна крос-компілювати для SBC target-а.
+      - name: Build inside dev container
+        uses: devcontainers/ci@v0.3
+        with:
+          # push: never - не публікувати built image ніде. За замовчуванням
+          # action пробує push у registry і падає з "imageName is required"
+          # бо ми не конфігуруємо registry. Image потрібен тільки локально
+          # на runner-і для runCmd.
+          push: never
+          runCmd: |
+            cmake --preset debug
+            cmake --build --preset debug
+            cmake --preset aarch64-debug
+            cmake --build --preset aarch64-debug

@@ -1,0 +1,8 @@
+{
+  // Рекомендація тільки для host VS Code: цей extension потрібен на машині
+  // студента, щоб відкрити репозиторій у devcontainer. C++ інструменти
+  // встановлюється всередині контейнера через .devcontainer/devcontainer.json.
+  "recommendations": [
+    "ms-vscode-remote.remote-containers"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  // VS Code tasks виконуються з кореня workspace у devcontainer terminal.
+  // Тут лишаються тільки базові команди: configure/build і clean.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // Default build task: Ctrl+Shift+B запускає debug preset, потім build.
+      "label": "CMake: configure and build",
+      "type": "shell",
+      "command": "cmake --preset debug && cmake --build --preset debug",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      // Clean task навмисно простий: видаляється тільки локальна build директорія.
+      "label": "CMake: clean build directory",
+      "type": "shell",
+      "command": "rm -rf build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    }
+  ]
+}

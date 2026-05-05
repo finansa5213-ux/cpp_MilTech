@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "debug",
+      "displayName": "Debug",
+      "description": "Debug build для занять блоку 2: символи для GDB і зрозуміла структура build/debug.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "aarch64-debug",
+      "displayName": "ARM64 Debug",
+      "description": "Cross-compile debug build для Raspberry Pi / Radxa / Jetson через aarch64-linux-gnu toolchain.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/aarch64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/aarch64-linux-gnu.cmake"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "displayName": "Build Debug",
+      "description": "Зібрати debug preset після configure.",
+      "configurePreset": "debug"
+    },
+    {
+      "name": "aarch64-debug",
+      "displayName": "Build ARM64 Debug",
+      "description": "Зібрати ARM64 debug preset після cross-configure.",
+      "configurePreset": "aarch64-debug"
+    }
+  ]
+}

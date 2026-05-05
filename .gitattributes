@@ -1,0 +1,20 @@
+# Нормалізувати текстові файли до LF, щоб приклади однаково працювали на
+# Linux, macOS і Windows+WSL.
+* text=auto eol=lf
+
+# Shell scripts і devcontainer hooks завжди мають LF, інакше bash у Linux
+# контейнері може падати на CRLF.
+*.sh text eol=lf
+.devcontainer/scripts/* text eol=lf
+Dockerfile text eol=lf
+
+# Бінарні assets не проходять text normalization.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar binary
+*.gz binary

@@ -1,0 +1,34 @@
+# Базові пакети для стабільної роботи Ubuntu image.
+ca-certificates
+curl
+locales
+sudo
+tzdata
+ssh
+git
+
+# C++ toolchain і language server для редактора.
+gcc
+clang
+clangd
+clang-tidy
+
+# Runtime-бібліотеки Clang sanitizer-ів і symbolizer для читабельного ASan/UBSan output.
+libclang-rt-18-dev
+llvm-18
+
+# Крос-тулчейн для ARM64-пристроїв: RPi4, Radxa ROCK 5B+, Jetson.
+g++-aarch64-linux-gnu
+
+# Інструменти для заняття 2.4: локальний і remote debug, memory diagnostics.
+gdb
+gdbserver
+gdb-multiarch
+valgrind
+
+# Інструменти збірки і форматери, які використовуються в лекціях та CI.
+make
+cmake
+clang-format
+cmake-format
+ninja-build

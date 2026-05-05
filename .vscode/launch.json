@@ -1,0 +1,56 @@
+{
+  // Launch configurations працюють у devcontainer і використовують GDB з image.
+  // Для ДЗ 5 потрібно буде додати окрему конфігурацію за цим прикладом.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Локальний debug demo-коду заняття 2.4. Використовує bad input,
+      // щоб GDB зупинився на runtime crash.
+      "name": "Debug demo 2.4: debug_probe",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/debug/demos/lesson_2_4/debug_probe/debug_probe",
+      "args": [
+        "${workspaceFolder}/demos/lesson_2_4/debug_probe/data/bad_missing_field.txt"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "preLaunchTask": "CMake: configure and build",
+      "setupCommands": [
+        {
+          "description": "Увімкнути pretty-printing для STL типів у GDB.",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      // Локальний debug стартера ДЗ 4. preLaunchTask збирає debug preset.
+      "name": "Debug homework_04: ugv_odometry",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/debug/homework_04/ugv_odometry",
+      "args": [
+        "${workspaceFolder}/homework_04/data/straight.txt"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "preLaunchTask": "CMake: configure and build",
+      "setupCommands": [
+        {
+          "description": "Увімкнути pretty-printing для STL типів у GDB.",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
