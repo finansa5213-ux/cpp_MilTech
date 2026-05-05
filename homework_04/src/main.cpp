@@ -181,10 +181,32 @@ int main(int argc, char** argv) {
     //         timestamp_ms fl_ticks fr_ticks bl_ticks br_ticks
     // Output: a table on stdout, starting from the second sample:
     //         timestamp_ms x y theta
-  
-    // The program expects exactly one argument: a path to telemetry samples.
-    if (argc != 2) {
-        std::cerr << "usage: ugv_odometry <input_path>\n";
+    
+    // ---- Розбір аргументів командного рядка ---- 
+    Verbosity verbosity = Verbosity::Verbose;
+    const char* input_path = nullptr;
+
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "--quiet" || arg == "-q") {
+            verbosity = Verbosity::Quiet;
+        }
+        else if (arg == "--help" || arg == "-h") {
+            print_usage(argv[0]);
+            return 0;
+        }
+        else if (!input_path) {
+            input_path = argv[i];
+        }
+        else {
+            print_usage(argv[0]);
+            return 1;
+        }
+    }
+ 
+    // ---- Перевірка і підготовка ---- 
+    if (!input_path) {
+        print_usage(argv[0]);
         return 1;
     }
 
