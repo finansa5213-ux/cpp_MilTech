@@ -210,5 +210,73 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    std::ifstream in(input_path);
+    if (!in) {
+        std::cerr << "Error: cannot open file '" << input_path << "'\n";
+        return 1;
+    }
+
+    const RobotParams params;
+    LocationOfRobot  location;
+    EncoderReading   prev;
+    bool             have_prev = false;
+    int              step_index = 0;
+
+    if (verbosity == Verbosity::Verbose) {
+        print_header(params, input_path);
+    }
+
+    std::string line;
+    int line_no = 0;
+
+    while (std::getline(in, line)) {
+        ++line_no;
+        EncoderReading cur;
+        switch (parse_line(line, cur)) {
+        case ParseStatus::Empty:
+            continue;
+        case ParseStatus::Invalid:
+            std::cerr << "Error: malformed line " << line_no
+                << ": " << line << '\n';
+            return 1;
+        case ParseStatus::Ok:
+            break;
+        }
+
+        if (!have_prev) {
+            prev = cur;
+            have_prev = true;
+            if (verbosity == Verbosity::Verbose) {
+                std::cerr << "\nStart row (t=" << cur.timestamp_ms
+                    << " ms): ticks ("
+                    << cur.fl_ticks << ", " << cur.fr_ticks << ", "
+                    << cur.bl_ticks << ", " << cur.br_ticks << ")\n";
+            }
+            continue;
+    }
+
+    ++step_index;
+    const long d_fl = cur.fl_ticks - prev.fl_ticks;
+    const long d_fr = cur.fr_ticks - prev.fr_ticks;
+    const long d_bl = cur.bl_ticks - prev.bl_ticks;
+    const long d_br = cur.br_ticks - prev.br_ticks;
+
+    if (verbosity == Verbosity::Verbose) {
+        std::cerr << "\nRow t=" << cur.timestamp_ms << " ms"
+            << "  (prev t=" << prev.timestamp_ms << " ms,"
+            << " dt=" << (cur.timestamp_ms - prev.timestamp_ms) << " ms)";
+    }
+
+    location = step(location, d_fl, d_fr, d_bl, d_br, params, verbosity, step_index);
+    print_step(cur.timestamp_ms, location);
+
+    prev = cur;
+    }
+
+    if (verbosity == Verbosity::Verbose) {
+        print_summary(location, step_index);
+    }
+
     return 0;
+
 }
