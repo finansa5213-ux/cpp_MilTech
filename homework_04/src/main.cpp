@@ -71,6 +71,65 @@ namespace {
         return ParseStatus::Ok;
     }
 
+    // ---- Один крок одометрії ----
+    // При verbosity == Verbose — друкує деталі обчислень на stderr.
+    LocationOfRobot  step(const LocationOfRobot& prev,
+        long d_fl, long d_fr, long d_bl, long d_br,
+        const RobotParams& p,
+        Verbosity verbosity,
+        int step_index)
+    {
+        // Крок 2. Усереднюємо борти (переднє і заднє колесо синхронні)
+        const double d_left = (d_fl + d_bl) / 2.0;
+        const double d_right = (d_fr + d_br) / 2.0;
+
+        // Крок 3. Тіки -> метри
+        const double dpt = p.distance_per_tick();
+        const double dL = d_left * dpt;
+        const double dR = d_right * dpt;
+
+        // Крок 4. Рух центру і зміна орієнтації
+        const double d = (dL + dR) / 2.0;
+        const double dtheta = (dR - dL) / p.wheelbase_m;
+
+        // Крок 5. Midpoint integration
+        const double heading_mid = prev.theta + dtheta / 2.0;
+        LocationOfRobot next;
+        next.x = prev.x + d * std::cos(heading_mid);
+        next.y = prev.y + d * std::sin(heading_mid);
+        next.theta = prev.theta + dtheta;
+
+        if (verbosity == Verbosity::Verbose) {
+            auto& log = std::cerr;
+            log << std::fixed << std::setprecision(6);
+            log << "\n--- step #" << step_index << " ---\n";
+            log << "  [1] delta ticks per wheel:\n"
+                << "      d_fl=" << d_fl << "  d_fr=" << d_fr
+                << "  d_bl=" << d_bl << "  d_br=" << d_br << "\n";
+            log << "  [2] averaged sides:\n"
+                << "      d_left  = (d_fl + d_bl) / 2 = " << d_left << " ticks\n"
+                << "      d_right = (d_fr + d_br) / 2 = " << d_right << " ticks\n";
+            log << "  [3] ticks -> meters (distance_per_tick = "
+                << dpt << " m/tick):\n"
+                << "      dL = " << dL << " m\n"
+                << "      dR = " << dR << " m\n";
+            log << "  [4] center motion:\n"
+                << "      d      = (dL + dR) / 2          = " << d << " m\n"
+                << "      dtheta = (dR - dL) / wheelbase  = " << dtheta << " rad\n";
+            log << "  [5] midpoint integration:\n"
+                << "      heading_mid = theta + dtheta/2  = " << heading_mid << " rad\n"
+                << "      x: " << prev.x << " + " << d << "*cos(" << heading_mid
+                << ") = " << next.x << "\n"
+                << "      y: " << prev.y << " + " << d << "*sin(" << heading_mid
+                << ") = " << next.y << "\n"
+                << "      theta: " << prev.theta << " + " << dtheta
+                << "  = " << next.theta << "\n";
+            log << "  => pose: (" << next.x << ", " << next.y
+                << ", " << next.theta << ")\n";
+        }
+        return next;
+    }
+
 }
 
 int main(int argc, char** argv) {
