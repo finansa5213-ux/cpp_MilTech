@@ -1,15 +1,6 @@
 // ============================================================
 // main.cpp — демонстрація рефакторингу ДЗ3 в архітектуру з
 // інтерфейсів, реалізацій, фабрики та MissionProcessor.
-//
-// Що тут показано:
-//   1. Створення всіх трьох компонентів виключно через фабрику.
-//   2. Завантаження даних: loader робить це сам у init();
-//      провайдер завантажуємо явно (loadFromFile), бо ITargetProvider
-//      за ТЗ не має методу load().
-//   3. MissionProcessor::init() для підготовки даних.
-//   4. Покрокова обробка циклом while (mission.hasNext()) { mission.step(); }
-//   5. delete для всіх створених через фабрику об'єктів.
 // ============================================================
 
 #include "Factory.h"
@@ -93,7 +84,6 @@ int main() {
     std::cout << "\n=== Обробка цілей ===" << std::endl;
 
     // Збираємо результати для запису у simulation.json — простий формат
-    // (масив точок скиду по цілях). Це демонстрація, не повна симуляція ДЗ3.
     json result;
     result["dropPoints"] = json::array();
 
@@ -126,20 +116,11 @@ int main() {
     std::cout << "\n[main] Оброблено цілей: " << processed << std::endl;
 
     // ---------- 6. Демонстрація reset() + changeSolver() ----------
-    // (Тут поки немає альтернативного solver-а, тому покажемо лише
-    // структурно: reset + повторний прохід з тим же solver-ом).
     std::cout << "\n=== Демонстрація reset() ===" << std::endl;
     mission.reset();
     int again = 0;
     while (mission.hasNext()) { mission.step(); again++; }
     std::cout << "[main] Повторний прохід: " << again << " цілей" << std::endl;
-
-    // Якщо колись додамо TableSolver:
-    //   IBallisticSolver* newSolver = createSolver(SolverType::TABLE);
-    //   mission.changeSolver(newSolver);
-    //   mission.reset();
-    //   while (mission.hasNext()) mission.step();
-    //   delete newSolver;
 
     // ---------- 7. Запис результату у simulation.json ----------
     std::ofstream out("simulation.json");
