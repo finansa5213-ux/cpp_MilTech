@@ -32,3 +32,4 @@ core.*
 .DS_Store
 Thumbs.db
 build/
+.cache/
