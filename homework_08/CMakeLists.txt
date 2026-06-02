@@ -1,6 +1,8 @@
 # ============================================================
-# homework_08 — структура проекту, STL-контейнери,
+# homework_08 — STL-контейнери + DroneStateMachine
 # ============================================================
+cmake_minimum_required(VERSION 3.14)
+project(homework_08 CXX)
 
 set(TARGET_NAME homework_08)
 
@@ -43,20 +45,11 @@ else()
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-# ------------------------------------------------------------
-# Копіювання вхідних JSON у каталог, звідки запускається бінарник.
-# ------------------------------------------------------------
-set(DATA_FILES
-    data/config.json
-    data/ammo.json
-    data/targets.json
-)
-
-foreach(DATA_FILE ${DATA_FILES})
-    get_filename_component(FILENAME ${DATA_FILE} NAME)
+# Копіювання JSON-даних поруч із бінарником
+foreach(F config.json ammo.json targets.json)
     configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/${DATA_FILE}
-        ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME}
+        ${CMAKE_CURRENT_SOURCE_DIR}/data/${F}
+        ${CMAKE_CURRENT_BINARY_DIR}/${F}
         COPYONLY
     )
 endforeach()

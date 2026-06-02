@@ -107,7 +107,9 @@ int main()
     }
     result["processed"] = processed;
 
-    std::cout << "[main] Оброблено: " << processed << " цілей\n\n";
+    std::cout << "[main] Оброблено: " << processed << " цілей"
+              << "  |  пропущено через помилки: "
+              << mission.skippedTargets() << "\n\n";
 
     // --- 6. Демонстрація reset() ---
     std::cout << "=== Демонстрація reset() ===\n";
