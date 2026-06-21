@@ -1,6 +1,5 @@
 // ============================================================
 // AnalyticalSolver.cpp — імплементація аналітичної балістики.
-// Формули один-в-один з ДЗ1 / ДЗ3.
 // ============================================================
 
 #include "AnalyticalSolver.h"
@@ -76,7 +75,6 @@ DropPoint AnalyticalSolver::solve(const Coord& dronePos,
     if (h <= 0.f) return out;
 
     // Прогноз цілі: де вона буде, коли бомба впаде.
-    // Спрощений прогноз — лінійний по швидкості (як у ДЗ3).
     Coord predicted = target.pos + target.velocity * t_fall;
 
     Coord delta = predicted - dronePos;

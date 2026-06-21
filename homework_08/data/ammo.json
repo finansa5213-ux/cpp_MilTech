@@ -1,0 +1,7 @@
+[
+  { "name": "VOG-17",      "mass": 0.35, "drag": 0.07, "lift": 0.0 },
+  { "name": "M67",         "mass": 0.60, "drag": 0.10, "lift": 0.0 },
+  { "name": "RKG-3",       "mass": 1.20, "drag": 0.10, "lift": 0.0 },
+  { "name": "GLIDING-VOG", "mass": 0.45, "drag": 0.10, "lift": 1.0 },
+  { "name": "GLIDING-RKG", "mass": 1.40, "drag": 0.10, "lift": 1.0 }
+]

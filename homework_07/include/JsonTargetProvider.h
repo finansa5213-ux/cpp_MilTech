@@ -10,11 +10,7 @@
 //       ...
 //     ]
 //   }
-//
-// Внутрішнє представлення: динамічний 2D-масив Coord** із
-// рознесеними рядками (як було в ДЗ3). У зовнішній світ
-// видається через getTarget(i) як Target з позицією в t=0
-// та швидкістю, обчисленою кінцевими різницями (як у ДЗ3).
+//.
 // ============================================================
 
 #include "ITargetProvider.h"
@@ -23,8 +19,6 @@
 class JsonTargetProvider : public ITargetProvider {
 private:
     // Динамічний 2D-масив: tracks_[targetIdx][timeStep].
-    // Зберігаємо ВСЮ траєкторію (а не лише t=0), бо це потрібно
-    // для коректного обчислення швидкості кінцевою різницею.
     Coord**     tracks_;
     int         targetCount_;
     int         timeSteps_;
@@ -33,7 +27,6 @@ private:
     bool        loaded_;
 
     // Лінійна інтерполяція позиції цілі в момент часу t
-    // (масив зациклений, як у ДЗ3).
     Coord interpolate(int targetIdx, float t) const;
 
     void freeTracks();
