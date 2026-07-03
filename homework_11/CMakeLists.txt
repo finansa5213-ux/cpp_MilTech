@@ -57,6 +57,16 @@ if(NOT GPIOD_INCLUDE_DIR OR NOT GPIOD_LIBRARY)
 endif()
 target_include_directories(${TARGET_NAME} PRIVATE ${GPIOD_INCLUDE_DIR})
 
+# v1 має gpiod_chip_open_by_name; якщо його нема — це API v2 (Ubuntu 24.04+)
+include(CheckSymbolExists)
+set(CMAKE_REQUIRED_INCLUDES  ${GPIOD_INCLUDE_DIR})
+set(CMAKE_REQUIRED_LIBRARIES ${GPIOD_LIBRARY})
+check_symbol_exists(gpiod_chip_open_by_name gpiod.h HW11_GPIOD_V1)
+if(NOT HW11_GPIOD_V1)
+    message(STATUS "libgpiod API v2 vyyavleno -> HW11_GPIOD_V2")
+    target_compile_definitions(${TARGET_NAME} PRIVATE HW11_GPIOD_V2)
+endif()
+
 find_package(Threads REQUIRED)
 target_link_libraries(${TARGET_NAME}
     PRIVATE ${GPIOD_LIBRARY} Threads::Threads

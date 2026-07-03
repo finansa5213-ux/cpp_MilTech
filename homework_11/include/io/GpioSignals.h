@@ -1,14 +1,15 @@
 #pragma once
 // ============================================================
-// GpioSignals — дві вихідні лінії GPIO через libgpiod (API v1):
+// GpioSignals — дві вихідні лінії GPIO через libgpiod:
 //   START — «я готовий»: 1 одразу на старті, тримається весь політ;
 //   DROP  — одноразовий імпульс 50-100 мс у момент скиду.
-// Працює і з реальним чипом плати.
+// Підтримує обидва API libgpiod:
+//   v1 (Raspberry Pi OS Bookworm, Ubuntu 22.04) — як в умові ДЗ;
+//   v2 (Ubuntu 24.04+) — обирається автоматично в CMake
+//       (define HW11_GPIOD_V2).
+// Працює і з gpio-sim (симуляція), і з реальним чипом плати.
 // ============================================================
 #include <string>
-
-struct gpiod_chip;
-struct gpiod_line;
 
 class GpioSignals {
 public:
@@ -26,7 +27,12 @@ public:
     void shutdown();                 // опустити лінії і звільнити ресурси
 
 private:
-    gpiod_chip* chip_  = nullptr;
-    gpiod_line* start_ = nullptr;
-    gpiod_line* drop_  = nullptr;
+    // Opaque-вказівники, щоб не тягнути gpiod.h у заголовок:
+    // v1: chip_ = gpiod_chip*, start_/drop_ = gpiod_line*
+    // v2: chip_ = gpiod_chip*, start_/drop_ = gpiod_line_request*
+    void*    chip_      = nullptr;
+    void*    start_     = nullptr;
+    void*    drop_      = nullptr;
+    unsigned startLine_ = 0;
+    unsigned dropLine_  = 0;
 };

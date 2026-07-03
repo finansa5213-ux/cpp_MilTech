@@ -4,6 +4,7 @@
 // Той самий бінарник для симуляції та плати:
 //   sim:  ./homework_11 --uart /tmp/ttyA     --gpiochip gpiochipN --start-line 24 --drop-line 23
 //   hw:   ./homework_11 --uart /dev/ttyAMA1  --gpiochip gpiochip0 --start-line 24 --drop-line 23
+// (ім'я gpio-sim чипа друкує чекер на старті)
 // ============================================================
 #include <csignal>
 #include <cstdio>
