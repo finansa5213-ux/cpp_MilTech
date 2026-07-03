@@ -5,6 +5,16 @@
 cmake_minimum_required(VERSION 3.20)
 project(homework_11 CXX)
 
+# --- libgpiod: без нього ціль пропускається (напр. крос-збірка без sysroot) ---
+find_path(GPIOD_INCLUDE_DIR gpiod.h)
+find_library(GPIOD_LIBRARY gpiod)
+if(NOT GPIOD_INCLUDE_DIR OR NOT GPIOD_LIBRARY)
+    message(WARNING
+        "homework_11: libgpiod ne znaydeno — tsil propushcheno "
+        "(sudo apt install libgpiod-dev)")
+    return()
+endif()
+
 set(TARGET_NAME homework_11)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -51,10 +61,6 @@ target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 # --- libgpiod (API v1): sudo apt install libgpiod-dev ---
 find_path(GPIOD_INCLUDE_DIR gpiod.h)
 find_library(GPIOD_LIBRARY gpiod)
-if(NOT GPIOD_INCLUDE_DIR OR NOT GPIOD_LIBRARY)
-    message(FATAL_ERROR
-        "libgpiod ne znaydeno. Vstanovit: sudo apt install libgpiod-dev")
-endif()
 target_include_directories(${TARGET_NAME} PRIVATE ${GPIOD_INCLUDE_DIR})
 
 # v1 має gpiod_chip_open_by_name; якщо його нема — це API v2 (Ubuntu 24.04+)

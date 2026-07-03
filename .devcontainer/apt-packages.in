@@ -32,3 +32,4 @@ cmake
 clang-format
 cmake-format
 ninja-build
+libgpiod-dev
