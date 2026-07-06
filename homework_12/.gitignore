@@ -1,0 +1,5 @@
+# Логи C2 мають лишатися на машинi, де запускався compose stack.
+edge/logs/
+
+# Викладацькi demo-файли та solution code не є частиною student-facing repo.
+_teacher/

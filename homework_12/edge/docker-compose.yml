@@ -1,0 +1,31 @@
+services:
+  c2_service:
+    # build: локальна збiрка для розробки та тестування ДЗ.
+    # На реальнiй цiльовiй машинi вихiдного коду немає, тому
+    # замiсть build: зазвичай використовується image: з готовим образом.
+    build:
+      context: ./c2
+      dockerfile: Dockerfile
+    depends_on:
+      auto_stub:
+        condition: service_healthy
+    volumes:
+      - ./config/c2_config.json:/etc/c2/c2_config.json:ro  # конфiг лише для читання
+      - ./logs:/var/log/c2                                 # логи видно на хостi пiсля stop
+    restart: _____    # для основного C2-сервiсу очiкується unless-stopped
+    network_mode: host
+
+  auto_stub:
+    # Готовий stub для генерацiї точок маршруту. C2-сервiс має лише приймати
+    # його JSON-команди та вирiшувати, коли їх можна передавати в FC.
+    image: ghcr.io/yevhenkuznetsov/hw12-auto-stub:latest
+    environment:
+      C2_HOST: "127.0.0.1"
+      C2_PORT: "14560"
+      # auto_stub читає той самий маршрут, який можна вiдкрити в QGC.
+      ROUTE_PLAN: "/opt/route/lyman-patrol.plan"
+      # auto_stub не читає телеметрiю, тому перемикає точки маршруту за таймером.
+      WAYPOINT_INTERVAL_SEC: "45"
+    volumes:
+      - ../qgc:/opt/route:ro
+    network_mode: host

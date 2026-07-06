@@ -1,0 +1,24 @@
+services:
+  fc_sim:
+    build: .
+    container_name: fc_sim
+    environment:
+      VEHICLE: Rover
+      SPEEDUP: "1"
+      # За замовчуванням QGC слухає UDP 14550 на цьому ж хостi.
+      # Якщо QGC не пiдключається, спочатку лишити 127.0.0.1 i пересоздати контейнер.
+      # GCS_HOST з /etc/resolv.conf потрiбен тiльки для окремих WSL2 NAT-конфiгурацiй.
+      GCS_HOST: "${GCS_HOST:-127.0.0.1}"
+      GCS_PORT: "14550"
+      # C2 service працює в host network, тому 127.0.0.1 вказує на той самий network namespace.
+      C2_HOST: "127.0.0.1"
+      C2_PORT: "14551"
+      # Стартова позицiя SITL
+      LAT: "48.983498065911704"
+      LON: "37.82220625228142"
+      ALT: "95"
+      DIR: "90"
+    network_mode: host
+    # Docker Desktop на macOS не пiдтримує network_mode: host.
+    # Для macOS потрiбно прибрати network_mode та явно опублiкувати порти.
+    restart: unless-stopped
