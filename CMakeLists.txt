@@ -22,6 +22,8 @@ add_subdirectory(homework_05)
 add_subdirectory(homework_06)
 add_subdirectory(homework_07)
 add_subdirectory(homework_08)
+add_subdirectory(homework_09)
+add_subdirectory(homework_10)
 
 # Demo-код для заняття 2.4: локальне і віддалене відлагодження через GDB.
 add_subdirectory(demos/lesson_2_4/debug_probe)
