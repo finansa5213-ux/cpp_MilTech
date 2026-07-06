@@ -12,7 +12,7 @@ services:
     volumes:
       - ./config/c2_config.json:/etc/c2/c2_config.json:ro  # конфiг лише для читання
       - ./logs:/var/log/c2                                 # логи видно на хостi пiсля stop
-    restart: _____    # для основного C2-сервiсу очiкується unless-stopped
+    restart: unless-stopped    # для основного C2-сервiсу очiкується unless-stopped
     network_mode: host
 
   auto_stub:
