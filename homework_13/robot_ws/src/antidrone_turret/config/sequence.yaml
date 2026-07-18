@@ -1,0 +1,20 @@
+# target_track_publisher_node читає CSV-трек з launch-аргумента track.
+# Тут налаштовується частота публікації і повторення треку.
+target_track_publisher_node:
+  ros__parameters:
+    publish_hz: 5.0
+    repeat_sequence: true
+
+# Actuator є навчальною driver-нодою. reload_ms визначає, коли після trigger
+# стан повертається з RELOADING у READY.
+actuator_node:
+  ros__parameters:
+    reload_ms: 1500
+    status_publish_hz: 2.0
+
+# Ці параметри почнуть використовуватись після додавання
+# turret_controller_node студентським рішенням.
+turret_controller_node:
+  ros__parameters:
+    confidence_threshold: 0.8
+    max_distance_m: 30.0

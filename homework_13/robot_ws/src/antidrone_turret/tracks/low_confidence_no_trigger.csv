@@ -1,0 +1,14 @@
+# visible,x,y,distance_m,confidence
+# FPV gets close, but every confidence value stays below the 0.80 default threshold.
+visible,x,y,distance_m,confidence
+true,315,242,65,0.42
+true,322,239,55,0.48
+true,335,234,45,0.53
+true,352,226,36,0.58
+true,371,216,29,0.61
+true,392,205,23,0.64
+true,414,193,18,0.66
+true,438,181,14,0.68
+true,461,170,12,0.67
+true,482,162,11,0.65
+false,0,0,0,0
