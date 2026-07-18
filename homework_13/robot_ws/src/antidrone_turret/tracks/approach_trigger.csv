@@ -1,0 +1,24 @@
+# visible,x,y,distance_m,confidence
+# FPV approaches the turret. A controller should trigger when distance <= max_distance_m.
+visible,x,y,distance_m,confidence
+true,319,241,80,0.62
+true,324,239,72,0.68
+true,331,236,64,0.74
+true,338,232,56,0.81
+true,350,226,48,0.86
+true,365,218,40,0.90
+true,383,208,34,0.92
+true,401,197,29,0.94
+true,420,186,24,0.95
+true,439,176,19,0.96
+true,458,166,15,0.96
+true,476,158,12,0.95
+false,0,0,0,0
+true,210,248,90,0.76
+true,235,243,76,0.80
+true,270,236,62,0.86
+true,310,228,48,0.90
+true,350,218,36,0.93
+true,390,205,28,0.95
+true,430,190,22,0.96
+true,470,176,16,0.95

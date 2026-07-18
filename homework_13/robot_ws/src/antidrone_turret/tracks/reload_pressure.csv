@@ -1,0 +1,23 @@
+# visible,x,y,distance_m,confidence
+# First close FPV can consume a shot. The next FPV reaches 7 m while actuator is reloading.
+visible,x,y,distance_m,confidence
+true,330,238,38,0.84
+true,342,232,32,0.88
+true,356,225,28,0.91
+true,370,218,24,0.93
+true,384,211,21,0.94
+true,398,204,19,0.95
+false,0,0,0,0
+true,300,238,26,0.92
+true,322,230,20,0.94
+true,348,220,15,0.95
+true,376,208,11,0.96
+true,404,196,7,0.96
+true,432,184,5,0.95
+false,0,0,0,0
+true,190,250,92,0.82
+true,230,244,73,0.86
+true,275,236,55,0.90
+true,325,226,38,0.93
+true,380,212,26,0.95
+true,435,198,18,0.96
