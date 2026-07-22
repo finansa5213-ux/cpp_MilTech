@@ -1,0 +1,10 @@
+{
+  "name": "ROS 2 Jazzy (homework_14)",
+  "image": "ros:jazzy-ros-base",
+  "postCreateCommand": "apt-get update && apt-get install -y ros-jazzy-ament-cmake-gtest && git config --global --add safe.directory ${containerWorkspaceFolder}",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-vscode.cpptools", "ms-python.python"]
+    }
+  }
+}

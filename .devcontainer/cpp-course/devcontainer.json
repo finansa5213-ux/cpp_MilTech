@@ -1,0 +1,106 @@
+{
+  // Назва, яка показується у VS Code Dev Containers UI.
+  "name": "CPP MilTech",
+
+  // Image збирається з локального Dockerfile. Аргументи потрібні, щоб
+  // container user і workspace path збігалися з host-сесією.
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "WORKSPACE_FOLDER": "${localEnv:HOME}/${localWorkspaceFolderBasename}",
+      "CONTAINER_USER": "${localEnv:USER}"
+    }
+  },
+
+  // VS Code відкриває контейнер від імені того самого користувача, що й host.
+  // Це зменшує проблеми з ownership файлів у bind mount.
+  "remoteUser": "${localEnv:USER}",
+
+  // Проєкт монтується у домашню директорію користувача всередині контейнера.
+  // Так шляхи виглядають однаково на Linux, macOS і Windows+WSL.
+  "workspaceMount": "source=${localWorkspaceFolder},target=${localEnv:HOME}/${localWorkspaceFolderBasename},type=bind",
+  "workspaceFolder": "${localEnv:HOME}/${localWorkspaceFolderBasename}",
+
+  // SSH ключі потрібні для git operations. bash_history винесено на host,
+  // щоб історія команд переживала rebuild контейнера.
+  "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/home/${localEnv:USER}/.ssh,type=bind,readonly,consistency=cached",
+    "source=${localEnv:HOME}/.devcontainers/${localWorkspaceFolderBasename}/.bash_history,target=/home/${localEnv:USER}/.bash_history,type=bind,consistency=delegated"
+  ],
+
+  // initialize створює host-side директорії для mounts до старту container-а.
+  // Запуск через bash робить команду стійкою до копіювання без executable bit.
+  "initializeCommand": [
+    "bash",
+    ".devcontainer/scripts/initialize"
+  ],
+
+  // host network спрощує SSH/debug сценарії для занять з target-пристроями.
+  // SYS_PTRACE і seccomp=unconfined потрібні для стабільної роботи GDB
+  // всередині контейнера, особливо коли debug-сесія attach-иться до процесу.
+  // ulimit core=-1 дозволяє процесам у контейнері створювати core dump.
+  // Сам шлях/формат core-файла все одно визначає host kernel через
+  // /proc/sys/kernel/core_pattern; у WSL це налаштовується окремо на host.
+  "runArgs": [
+    "--network=host",
+    "--cap-add=SYS_PTRACE",
+    "--security-opt=seccomp=unconfined",
+    "--ulimit=core=-1",
+    "--hostname=devcontainer",
+    "--add-host=devcontainer:127.0.1.1"
+  ],
+
+  // Усе всередині customizations.vscode застосовується саме до VS Code
+  // сесії в контейнері. Це не те саме, що .vscode/extensions.json на host.
+  "customizations": {
+    "vscode": {
+      // Extensions встановлюються в devcontainer, щоб tooling був однаковий
+      // у всіх студентів незалежно від host VS Code.
+      "extensions": [
+        "josetr.cmake-language-support-vscode",
+        "cheshirekow.cmake-format",
+        "ms-vscode.cpptools",
+        "llvm-vs-code-extensions.vscode-clangd"
+      ],
+      "settings": {
+        // clangd читає build/debug/compile_commands.json з debug preset.
+        // clang-tidy конфіг лишається в репозиторії, але автоматичний запуск
+        // через clangd буде увімкнено пізніше, після заняття 2.6.
+        "clangd.path": "/usr/bin/clangd",
+        "clangd.arguments": [
+          "--compile-commands-dir=build/debug",
+          "--background-index"
+        ],
+        "clangd.restartAfterCrash": true,
+        // IntelliSense від Microsoft C++ extension вимкнено, щоб не було двох
+        // C++ language server-ів одночасно. Основний engine - clangd.
+        "C_Cpp.intelliSenseEngine": "disabled",
+        "[cpp]": {
+          "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+          "editor.quickSuggestions": {
+            "other": "on",
+            "comments": "off",
+            "strings": "off"
+          }
+        },
+        "[cmake]": {
+          "editor.defaultFormatter": "cheshirekow.cmake-format"
+        },
+        // cmake-format читає конфіг, який Dockerfile копіює в /.
+        "cmakeFormat.args": [
+          "--config-file=/.cmake-format.json"
+        ],
+        "cmakeFormat.exePath": "/usr/bin/cmake-format",
+        // Єдиний bash profile у container terminal. Історія команд монтується
+        // окремо через mounts вище.
+        "terminal.integrated.defaultProfile.linux": "bash (container default)",
+        "terminal.integrated.profiles.linux": {
+          "bash (container default)": {
+            "path": "/bin/bash",
+            "overrideName": true
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+name: training_corridor
+max_steps: 80
+scan_radius: 1
+grid:
+  - "#########"
+  - "#S..C...#"
+  - "#########"

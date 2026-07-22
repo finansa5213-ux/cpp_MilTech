@@ -1,0 +1,30 @@
+# CI для ДЗ 14 (ROS 2 / colcon). Окремий від курсового build.yml,
+# бо ДЗ 14 збирається через colcon в образі ros:jazzy, а не через
+# cmake-presets C++-курсу. Тригериться лише на зміни в homework_14/.
+name: Build homework_14
+
+on:
+  pull_request:
+    paths:
+      - 'homework_14/**'
+  push:
+    branches: [main]
+    paths:
+      - 'homework_14/**'
+
+jobs:
+  colcon-build:
+    runs-on: ubuntu-latest
+    container: ros:jazzy-ros-base
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: colcon build
+        shell: bash
+        run: |
+          apt-get update
+          apt-get install -y ros-jazzy-ament-cmake-gtest
+          source /opt/ros/jazzy/setup.bash
+          cd homework_14/robot_ws
+          colcon build --symlink-install
