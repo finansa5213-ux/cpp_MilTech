@@ -1,0 +1,9 @@
+string scenario_name
+uint32 steps_taken
+uint32 invalid_moves
+uint32 contacts_seen
+uint32 contacts_down
+uint32 invalid_triggers
+uint32 duplicate_triggers
+uint32 unique_cells_seen
+float32 map_coverage_percent
