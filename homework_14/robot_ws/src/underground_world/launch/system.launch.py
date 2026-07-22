@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, TimerAction
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
@@ -30,7 +30,26 @@ def generate_launch_description():
         ],
     )
 
-    # Тут можна додати керуючі ноди або інший launch-файл з рішенням.
+    # Ноди рішення стартують першими, щоб гарантовано підписатися на
+    # /robot/local_scan ДО одноразової стартової публікації світу.
+    payload_action_node = Node(
+        package="mission_control",
+        executable="payload_action",
+        name="payload_action",
+        output="screen",
+    )
+
+    mission_explorer_node = Node(
+        package="mission_control",
+        executable="mission_explorer",
+        name="mission_explorer",
+        output="screen",
+    )
+
+    # underground_world_node публікує стартовий стан один раз одразу після
+    # запуску; затримка 2 c усуває гонку discovery на старті системи.
+    delayed_world_node = TimerAction(period=2.0, actions=[world_node])
+
     return LaunchDescription(
         [
             DeclareLaunchArgument(
@@ -43,6 +62,8 @@ def generate_launch_description():
                 default_value="50",
                 description="Delay before applying queued move commands",
             ),
-            world_node,
+            payload_action_node,
+            mission_explorer_node,
+            delayed_world_node,
         ]
     )
