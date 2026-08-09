@@ -3,7 +3,13 @@
 name: homework_16
 
 on:
+  # Ручний запуск кнопкою в Actions.
+  workflow_dispatch:
+  # Тільки main: при merge PR. Без обмеження по гілках push і
+  # pull_request запускали б одну й ту саму збірку двічі на кожен
+  # update PR — та сама причина, що й у build.yml.
   push:
+    branches: [main]
     paths:
       - 'homework_16/**'
       - '.github/workflows/homework_16.yml'
