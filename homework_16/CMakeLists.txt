@@ -22,6 +22,14 @@ target_link_libraries(homework_16 PRIVATE mpu6050_core)
 target_compile_options(homework_16 PRIVATE -Wall -Wextra -Wpedantic)
 
 # --- Тести --------------------------------------------------------------------
+# При крос-компіляції тести не збираємо: gtest_discover_tests запускає
+# зібраний бінарник, щоб перелічити тести, а ARM64-файл на x86-64 хості
+# не виконується. Та сама конвенція діє в homework_06.
+if(CMAKE_CROSSCOMPILING)
+    message(STATUS "homework_16: крос-збірка — ціль mpu6050_tests пропущено")
+    return()
+endif()
+
 # GoogleTest може вже бути в проєкті (кореневий CMakeLists тягне його через
 # FetchContent для попередніх ДЗ), бути встановленим у системі, або не бути
 # зовсім. Перевіряємо в цьому порядку й ПОВТОРНО НЕ ЗАВАНТАЖУЄМО — інакше
