@@ -22,7 +22,7 @@ jobs:
     # актуальною Ubuntu. Для нашого випадку (build всередині
     # devcontainer-а) специфічний runner не потрібен.
     runs-on: ubuntu-latest
-
+    timeout-minutes: 20
     steps:
       # Стандартний checkout коду. v4 - поточна стабільна major.
       - name: Checkout

@@ -33,3 +33,11 @@ core.*
 Thumbs.db
 build/
 .cache/
+build/
+homework_*/build/
+simulation.json
+# дані лишаються лише в homework_*/data/
+/homework_*/ammo.json
+/homework_*/config.json
+/homework_*/targets.json
+/homework_*/ballistic_table.txt
