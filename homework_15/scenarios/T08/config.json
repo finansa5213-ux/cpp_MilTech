@@ -1,0 +1,20 @@
+{
+  "drone": {
+    "position": {
+      "x": 100,
+      "y": 300
+    },
+    "altitude": 150,
+    "initialDirection": 0,
+    "attackSpeed": 12,
+    "accelerationPath": 12,
+    "angularSpeed": 1,
+    "turnThreshold": 0.1
+  },
+  "ammo": "GLIDING-VOG",
+  "simulation": {
+    "timeStep": 0.1,
+    "hitRadius": 3
+  },
+  "targetArrayTimeStep": 10
+}

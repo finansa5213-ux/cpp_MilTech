@@ -26,6 +26,9 @@
 #include "interfaces/IBallisticSolver.h"
 #include "interfaces/IConfigLoader.h"
 #include "drone/DroneStateMachine.h"
+#include "SimStep.h"
+
+#include <vector>
 
 class MissionProcessor {
 private:
@@ -43,9 +46,17 @@ private:
 
     DroneStateMachine drone_;
 
+    // Записана траєкторія: по одному запису на кожен тік симуляції.
+    // Потрібна чекеру курсу, який програє політ і перевіряє його
+    // на відповідність обмеженням швидкості, прискорення й повороту.
+    std::vector<SimStep> trace_;
+
     // Знайти індекс найближчої необробленої цілі від поточної позиції дрона.
     // Повертає індекс або -1 якщо більше цілей немає.
     int findNearestNextTarget() const;
+
+    // Записати поточний стан дрона в буфер траєкторії.
+    void recordStep(const DropPoint& dp);
 
 public:
     MissionProcessor(IConfigLoader*    loader,
@@ -64,4 +75,5 @@ public:
     int                       currentIndex()    const { return currentIdx_;     }
     int                       skippedTargets()  const { return skippedTargets_; }
     const DroneStateMachine&  drone()           const { return drone_;          }
+    const std::vector<SimStep>& trace()         const { return trace_;          }
 };

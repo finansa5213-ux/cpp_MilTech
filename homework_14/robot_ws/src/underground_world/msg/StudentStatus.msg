@@ -1,0 +1,6 @@
+uint8 EXPLORING=0
+uint8 ENGAGING=1
+uint8 RETURNING=2
+uint8 DONE=3
+uint8 FAILED=4
+uint8 state

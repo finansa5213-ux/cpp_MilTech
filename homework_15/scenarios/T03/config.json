@@ -1,0 +1,20 @@
+{
+  "drone": {
+    "position": {
+      "x": 100,
+      "y": 100
+    },
+    "altitude": 80,
+    "initialDirection": 0,
+    "attackSpeed": 10,
+    "accelerationPath": 10,
+    "angularSpeed": 1,
+    "turnThreshold": 0.1
+  },
+  "ammo": "M67",
+  "simulation": {
+    "timeStep": 0.1,
+    "hitRadius": 3
+  },
+  "targetArrayTimeStep": 10
+}

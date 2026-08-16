@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>mission_control</name>
+  <version>0.1.0</version>
+  <description>Homework 14 solution: mission_explorer + payload_action for underground_world.</description>
+
+  <maintainer email="finansa5213-ux@example.com">vitalij</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>underground_world</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
