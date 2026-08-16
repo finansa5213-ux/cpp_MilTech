@@ -33,6 +33,15 @@ core.*
 Thumbs.db
 build/
 .cache/
+homework_*/build/
+simulation.json
+# дані лишаються лише в homework_*/data/
+/homework_*/ammo.json
+/homework_*/config.json
+/homework_*/targets.json
+/homework_*/ballistic_table.txt
+
+# ДЗ17: зовнішні залежності і бінарники чекерів
 c_library_v2/
 checker-linux-*
-checker-linux-*
+checker_pi_*

@@ -1,0 +1,20 @@
+{
+  "drone": {
+    "position": {
+      "x": 200,
+      "y": 150
+    },
+    "altitude": 80,
+    "initialDirection": 0.7,
+    "attackSpeed": 10,
+    "accelerationPath": 10,
+    "angularSpeed": 1,
+    "turnThreshold": 0.1
+  },
+  "ammo": "RKG-3",
+  "simulation": {
+    "timeStep": 0.1,
+    "hitRadius": 4
+  },
+  "targetArrayTimeStep": 10
+}
