@@ -49,9 +49,10 @@ void DroneStateMachine::retarget(const Coord& newFirePoint)
 {
     firePoint_ = newFirePoint;
 
-    // Термінальні та неініціалізований стан — не торкаємось
-    if (data_.state == DroneState::STOP  ||
-        data_.state == DroneState::ERROR ||
+    // STOP і NOT_INITIALIZED лишаються термінальними.
+    // З ERROR виходимо: саме через retarget() відбувається відновлення
+    // після помилки (див. recoverFromError у MissionProcessor).
+    if (data_.state == DroneState::STOP ||
         data_.state == DroneState::NOT_INITIALIZED) return;
 
     // Скидаємо лічильник, час і код помилки для нової цілі,
@@ -174,12 +175,14 @@ void DroneStateMachine::handleAccelerating(float dt)
         return;
     }
 
-    // Лінійний розгін відносно accelPath
+    // Рівноприскорений розгін: за шлях accelPath дрон набирає attackSpeed.
+    // Саме цю модель закладено в чит-детекцію чекера (a = V²/(2·S)).
     if (accelPath_ > EPS) {
-        float ratio  = std::max(0.f, std::min(1.f, 1.f - dist / accelPath_));
-        data_.speed  = std::max(attackSpeed_ * 0.05f, attackSpeed_ * ratio);
+        const float accel = (attackSpeed_ * attackSpeed_)
+                            / (2.f * accelPath_);
+        data_.speed = std::min(attackSpeed_, data_.speed + accel * dt);
     } else {
-        data_.speed  = attackSpeed_;
+        data_.speed = attackSpeed_;
     }
 
     data_.pos.x += std::cos(data_.dir) * data_.speed * dt;

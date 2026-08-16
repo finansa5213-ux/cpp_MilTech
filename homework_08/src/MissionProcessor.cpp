@@ -111,6 +111,7 @@ static bool recoverFromError(DroneStateMachine& drone,
     if (start >= total) {
         std::cerr << "  [SM] Більше цілей немає після пропуску #"
                   << currentIdx << "\n";
+        currentIdx = total;
         drone.stop();
         return false;
     }
@@ -141,6 +142,29 @@ static bool recoverFromError(DroneStateMachine& drone,
     Target nextTgt = provider->getTarget(bestIdx);
     drone.retarget(nextTgt.pos);   // тимчасовий firePoint — уточниться в step()
     return true;
+}
+
+// ------------------------------------------------------------
+// recordStep — знімок поточного стану дрона у буфер траєкторії.
+//
+// Викликається на кожному тіку. Чекер рахує швидкість і прискорення
+// як різницю сусідніх записів, тому пропуск бодай одного кроку
+// спотворює перевірку.
+// ------------------------------------------------------------
+void MissionProcessor::recordStep(const DropPoint& dp)
+{
+    const DroneStateData& d = drone_.data();
+
+    SimStep st;
+    st.position        = d.pos;
+    st.direction       = d.dir;
+    st.state           = checkerStateCode(d.state);
+    st.targetIndex     = currentIdx_;
+    st.dropPoint       = dp.firePoint;
+    st.aimPoint        = dp.firePoint;   // проміжних точок немає
+    st.predictedTarget = dp.predictedTarget;
+
+    trace_.push_back(st);
 }
 
 // ------------------------------------------------------------
@@ -189,12 +213,20 @@ DropPoint MissionProcessor::step()
     DroneState prevState = drone_.state();
     int ticks = 0;
 
+    // Стартовий стан пишемо ЛИШЕ на початку місії. Для кожної
+    // наступної цілі дрон продовжує рух із попередньої позиції —
+    // повторний запис створив би дубль координат, а чекер порахував
+    // би його як зупинку з подальшим стрибком прискорення.
+    if (trace_.empty()) recordStep(dp);
+
     while (drone_.state() != DroneState::ATTACK &&
            drone_.state() != DroneState::ERROR  &&
            drone_.state() != DroneState::STOP)
     {
         drone_.tick(cfg_.simTimeStep);
         ++ticks;
+
+        recordStep(dp);
 
         if (drone_.state() != prevState) {
             std::cout << "    [SM] " << droneStateName(prevState)
@@ -237,6 +269,7 @@ void MissionProcessor::reset()
 {
     currentIdx_     = 0;
     skippedTargets_ = 0;
+    trace_.clear();
     drone_.init(cfg_.startPos,
                 cfg_.initialDir,
                 cfg_.attackSpeed,

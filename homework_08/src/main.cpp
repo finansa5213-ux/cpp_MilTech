@@ -107,6 +107,28 @@ int main()
     }
     result["processed"] = processed;
 
+    // --- Траєкторія у форматі чекера курсу ---
+    // Чекер очікує масив steps із покроковим станом дрона. Поля й
+    // кодування станів визначені в SimStep.h.
+    result["steps"] = json::array();
+    for (const SimStep& st : mission.trace()) {
+        result["steps"].push_back({
+            {"position",        {{"x", st.position.x},
+                                 {"y", st.position.y}}},
+            {"direction",       st.direction},
+            {"state",           st.state},
+            {"targetIndex",     st.targetIndex},
+            {"dropPoint",       {{"x", st.dropPoint.x},
+                                 {"y", st.dropPoint.y}}},
+            {"aimPoint",        {{"x", st.aimPoint.x},
+                                 {"y", st.aimPoint.y}}},
+            {"predictedTarget", {{"x", st.predictedTarget.x},
+                                 {"y", st.predictedTarget.y}}}
+        });
+    }
+    std::cout << "[main] Записано кроків траєкторії: "
+              << result["steps"].size() << "\n";
+
     std::cout << "[main] Оброблено: " << processed << " цілей"
               << "  |  пропущено через помилки: "
               << mission.skippedTargets() << "\n\n";

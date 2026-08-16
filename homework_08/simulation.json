@@ -1,0 +1,75 @@
+{
+  "dropPoints": [
+    {
+      "fallTime": 5.749755859375,
+      "firePoint": {
+        "x": 37.298988342285156,
+        "y": 0.0
+      },
+      "flightTime": 2.5999996662139893,
+      "predictedTarget": {
+        "x": 150.0,
+        "y": 0.0
+      },
+      "targetIndex": 0,
+      "valid": true
+    },
+    {
+      "fallTime": 5.749755859375,
+      "firePoint": {
+        "x": 92.68401336669922,
+        "y": 17.019023895263672
+      },
+      "flightTime": 12.500011444091797,
+      "predictedTarget": {
+        "x": 200.0,
+        "y": 50.0
+      },
+      "targetIndex": 1,
+      "valid": true
+    },
+    {
+      "fallTime": 5.749755859375,
+      "firePoint": {
+        "x": 6.401898384094238,
+        "y": 45.25896453857422
+      },
+      "flightTime": 35.70002746582031,
+      "predictedTarget": {
+        "x": -100.0,
+        "y": 80.0
+      },
+      "targetIndex": 2,
+      "valid": true
+    },
+    {
+      "fallTime": 5.749755859375,
+      "firePoint": {
+        "x": 6.401898384094238,
+        "y": 45.25896453857422
+      },
+      "flightTime": 0.10000000149011612,
+      "predictedTarget": {
+        "x": 50.0,
+        "y": 120.0
+      },
+      "targetIndex": 3,
+      "valid": true
+    },
+    {
+      "fallTime": 5.749755859375,
+      "firePoint": {
+        "x": 83.57401275634766,
+        "y": -1.689639925956726
+      },
+      "flightTime": 37.00000762939453,
+      "predictedTarget": {
+        "x": 180.0,
+        "y": -60.0
+      },
+      "targetIndex": 4,
+      "valid": true
+    }
+  ],
+  "processed": 5
+}
