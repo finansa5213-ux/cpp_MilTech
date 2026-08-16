@@ -17,8 +17,8 @@ inline constexpr double kLon0Deg = 30.5234;
 inline constexpr double kMetersPerDegLat = 111320.0;
 
 struct GeoPoint {
-  double lat_deg{};
-  double lon_deg{};
+    double lat_deg{};
+    double lon_deg{};
 };
 
 /// Локальні координати -> градуси.
@@ -39,4 +39,4 @@ double headingFromVelocityDeg(double vx_east_mps, double vy_north_mps, double fa
 /// Компасний курс у градусах -> yaw у радіанах для ATTITUDE, діапазон (-pi, pi].
 double headingDegToYawRad(double heading_deg);
 
-}  // namespace mavtel
+} // namespace mavtel
