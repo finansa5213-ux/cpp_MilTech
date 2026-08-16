@@ -1,0 +1,54 @@
+# Окремий pipeline для ДЗ16, щоб не чіпати наявні workflow інших занять.
+# Файл має лежати в КОРЕНІ репозиторію: .github/workflows/homework_16.yml
+name: homework_16
+
+on:
+  # Ручний запуск кнопкою в Actions.
+  workflow_dispatch:
+  # Тільки main: при merge PR. Без обмеження по гілках push і
+  # pull_request запускали б одну й ту саму збірку двічі на кожен
+  # update PR — та сама причина, що й у build.yml.
+  push:
+    branches: [main]
+    paths:
+      - 'homework_16/**'
+      - '.github/workflows/homework_16.yml'
+  pull_request:
+    paths:
+      - 'homework_16/**'
+      - '.github/workflows/homework_16.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Встановити залежності
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ libgtest-dev
+
+      - name: Конфігурація
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Збірка
+        run: cmake --build build --target homework_16 mpu6050_tests -j "$(nproc)"
+
+      - name: Юніт-тести
+        run: ctest --test-dir build --output-on-failure -R "Be16|Convert|Driver"
+
+      - name: Перевірка запуску без датчика
+        # На раннері немає /dev/i2c-*, тому очікуємо саме керовану відмову
+        # з кодом 2, а не падіння.
+        run: |
+          ./build/homework_16/homework_16 --help
+          set +e
+          ./build/homework_16/homework_16 /dev/i2c-1 0x68 --samples 1
+          code=$?
+          set -e
+          if [ "$code" -ne 2 ]; then
+            echo "Очікували код 2 (немає шини), отримали $code"
+            exit 1
+          fi
+          echo "Відмова оброблена коректно"
