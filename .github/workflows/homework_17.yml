@@ -1,0 +1,36 @@
+name: homework_17
+
+on:
+  push:
+    branches: [ "homework_17" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+# Наскрізний прогін (чекер ДЗ11 + чекер ДЗ17) у CI неможливий:
+# він потребує gpio-sim, тобто модуля ядра. Тому тут збірка і юніт-тести,
+# які покривають усю конверсію MAVLink і автомат повторів.
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ libgpiod-dev
+
+      - name: Clone MAVLink c_library_v2
+        run: git clone --depth 1 https://github.com/mavlink/c_library_v2.git
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+
+      - name: Build
+        run: cmake --build build -j
+
+      - name: Unit tests
+        run: ctest --test-dir build -R "GeoTest|MavlinkLinkTest|Dz11BridgeTest" --output-on-failure
+
+      - name: Drone binary starts
+        run: ./build/homework_17/drone --help

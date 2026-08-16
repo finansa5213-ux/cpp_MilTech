@@ -1,0 +1,229 @@
+# homework_17 — ДЗ Заняття 34: телеметрія дрона по MAVLink 2 / UDP
+
+Розширення ДЗ11. Автопілот працює так само: читає телеметрію і цілі з UART від
+чекера ДЗ11, рахує балістику, шле `PKT_CONTROL` і дає імпульс DROP на GPIO.
+Додано другий канал: **той самий кадр телеметрії** паралельно йде в MAVLink 2
+по UDP на `127.0.0.1:14550`, а в момент скиду — `COMMAND_LONG`
+(`MAV_CMD_USER_1`) з повторами до `COMMAND_ACK`.
+
+ДЗ11 при цьому не змінюється: його модулі підключаються з `../homework_11`
+напряму, дублювання коду немає.
+
+## Структура
+
+```
+include/
+  transport.hpp          інтерфейс каналу байтів (тестування без сокета)
+  udp_socket.hpp         неблокуючий UDP поверх ITransport
+  geo.hpp                локальні метри -> градуси, робота з курсом
+  mavlink_link.hpp       кадри MAVLink 2 + FSM повторів команди скиду
+  dz11_bridge.hpp        міст dlink::Telemetry -> MAVLink (уся конверсія тут)
+  MavMissionProcessor.h  цикл місії ДЗ11 з мітками [ДЗ17] у точках підключення
+src/                     реалізації + main.cpp
+tests/                   GoogleTest: геометрія, одиниці полів, повтори, міст
+tools/fake_checker.py    локальний «псевдочекер» MAVLink для самоперевірки
+```
+
+Підключається з ДЗ11 без змін: `AnalyticalSolver`, `DroneController`,
+`UartLink`, `GpioSignals`, `LinkState`, `Types.h`, `drone_link.h`.
+
+## Що саме додано до ДЗ11
+
+Усі відмінності позначені в коді міткою `[ДЗ17]` і зводяться до трьох викликів:
+
+| Місце в циклі місії | Виклик |
+|---|---|
+| кожен кадр `PKT_TELEMETRY` | `bridge_.onTelemetry(t, nowMs())` |
+| момент `gpio_.pulseDrop(80)` | `bridge_.onDrop(t, nowMs())` |
+| тайм-аут очікування телеметрії | `bridge_.tick(nowMs())` |
+
+Плюс `coastUntilDropResolved()` — режим вибігу після циклу.
+
+### Чому потрібен вибіг
+
+Чекер ДЗ11 припиняє слати телеметрію одразу після оцінки скиду, а на 5 спроб
+`COMMAND_LONG` з таймаутом 500 мс потрібно до 2.5 с. Якби програма вийшла
+разом із ДЗ11, чекер ДЗ17 побачив би обірваний потік і незавершені повтори.
+
+У режимі вибігу позиція екстраполюється по останній швидкості
+(`x += vx * dt`), тому перевірка «зміна позиції відповідає швидкостям»
+лишається виконаною, курс не пливе, а `time_boot_ms` зростає монотонно.
+
+### Конвенція осей
+
+У ДЗ11 напрямок польоту рахується як `{cos(dir), sin(dir)}` — отже `dir` це
+математичний кут від осі X проти годинникової стрілки. Мапимо `x` в схід,
+`y` в північ.
+
+Компасний курс для `hdg` і `ATTITUDE.yaw` береться **з вектора швидкості**
+(`atan2(vx, vy)`), а не з `t.dir`. Так курс гарантовано узгоджений із напрямком
+руху — саме це перевіряє чекер. `t.dir` використовується лише як запасний
+варіант при майже нульовій швидкості.
+
+## Збірка
+
+```bash
+sudo apt install libgpiod-dev socat gpiod
+git clone --depth 1 https://github.com/mavlink/c_library_v2.git   # у корені репозиторію
+cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build -j
+ctest --test-dir build --output-on-failure
+```
+
+Без `libgpiod` ціль пропускається з попередженням — як у ДЗ11.
+
+## Запуск
+
+Ланцюжок той самий, що в ДЗ11, плюс слухач MAVLink на 14550.
+
+**На Raspberry Pi (перевірений сценарій):**
+
+```bash
+# 1) чекер ДЗ11 — джерело фізики
+sudo ~/dz11/checker_pi_arm64 5 --hw --uart /dev/ttyAMA0 \
+     --gpiochip gpiochip0 --start-line 27 --drop-line 22 &
+
+# 2) слухач MAVLink: чекер ДЗ17 АБО QGroundControl
+./checker-linux-arm64 14550 &
+
+# 3) автопілот
+./build/homework_17/drone --uart /dev/ttyAMA2 --gpiochip gpiochip0 \
+     --start-line 24 --drop-line 23
+```
+
+Номери ліній у чекера і в дрона різні — кожен тримає свій кінець перемички.
+
+**У симуляції (потрібен модуль ядра gpio-sim):**
+
+```bash
+socat -d -d pty,raw,echo=0,link=/tmp/ttyA pty,raw,echo=0,link=/tmp/ttyB &
+sudo ./checker 1 --uart /tmp/ttyB --start-line 24 --drop-line 23 &
+./checker-linux-x86_64 14550 &
+./build/homework_17/drone --uart /tmp/ttyA --gpiochip gpiochipN \
+    --start-line 24 --drop-line 23
+```
+
+Ядра WSL2 і Raspberry Pi OS збираються без `CONFIG_GPIO_SIM`, тому цей шлях
+доступний не всюди — перевірити можна через `sudo modprobe gpio-sim`.
+
+Порядок важливий: слухач MAVLink має вже слухати порт, коли стартує дрон.
+
+## QGroundControl
+
+Замість кроку 3 запустіть QGC — він слухає UDP :14550 за замовчуванням, дрон
+з'явиться на мапі сам. QGC **не** відповідає ACK на `MAV_CMD_USER_1`, тому
+програма чесно робить 5 спроб і друкує `[mavlink] ACK ne otrymano pislya 5 sprob`,
+а телеметрія при цьому не зупиняється.
+
+Чекер ДЗ17 і QGC одночасно не піднімуться — обидва займають 14550.
+
+### WSL2 + QGC на Windows
+
+`127.0.0.1` з WSL2 до Windows не долетить. Або дзеркальна мережа у
+`C:\Users\<user>\.wslconfig`:
+
+```ini
+[wsl2]
+networkingMode=mirrored
+```
+
+(потім `wsl --shutdown`), або явна адреса хоста:
+
+```bash
+--dest $(ip route show default | awk '{print $3}'):14550
+```
+
+Чекерів це не стосується — вони запускаються всередині WSL2.
+
+## Самоперевірка без чекера ДЗ17
+
+```bash
+python3 homework_17/tools/fake_checker.py --ack-on 2 &
+# далі кроки 1, 2, 4 зі списку вище
+```
+
+Скрипт розбирає потік із перевіркою CRC, друкує темпи і вміє відповідати ACK на
+N-у спробу. `--ack-on 0` — не відповідати ніколи.
+
+## Відповідність вимогам ДЗ
+
+| Вимога | Де реалізовано |
+|---|---|
+| MAVLink 2, стабільні sysid/compid | `MavlinkLink` (конструктор знімає `OUT_MAVLINK1`), sysid=1, compid=`MAV_COMP_ID_AUTOPILOT1` |
+| HEARTBEAT ~1 Гц, QUADROTOR/ACTIVE | `Dz11Bridge::sendHeartbeatIfDue()`, темп не залежить від частоти кадрів ДЗ11 |
+| Телеметрія >=2 Гц | кожен кадр `PKT_TELEMETRY`; у вибігу — 10 Гц |
+| `time_boot_ms` монотонний | `t.t_ms` з ДЗ11; у вибігу нарощується по реальному часу |
+| lat/lon x1e7, alt мм, vx/vy см/с, hdg сот. градуса | `degTo1e7`, `metersToMm`, `mpsToCms`, `headingToCentiDeg` |
+| hdg відповідає напрямку руху | курс із вектора швидкості, той самий кут у `ATTITUDE.yaw` |
+| COMMAND_LONG з координатами скиду | `Dz11Bridge::onDrop()`; `param5/6` — позиція дрона в момент випуску (чекер вимагає <=500 м), `param7` — висота |
+| Повтор до ACK, до 5 спроб, таймаут | `MavlinkLink::poll()`, `kMaxDropAttempts=5`, `kAckTimeoutMs=500` |
+| Після ACK — тиша | `DropState::Acked` блокує повтори |
+| Телеметрія не зупиняється під час повторів | повтори неблокуючі + режим вибігу |
+
+## Що перевірено
+
+- Збірка під `-Wall -Wextra -Wpedantic` без попереджень (GCC 13 і 15, x86_64 і aarch64).
+- 25 юніт-тестів: геометрія, одиниці полів MAVLink, автомат повторів,
+  конверсія осей ДЗ11, темп HEARTBEAT, узгодженість позиції у вибігу.
+- Наскрізний прогін на реальному стенді Raspberry Pi 5 (див. нижче).
+
+### Стенд
+
+Raspberry Pi 5, Raspberry Pi OS (ядро 6.18.34+rpt-rpi-v8, aarch64), libgpiod API v2.
+Обидва UART реальні, GPIO — фізичні перемички між пінами хедера:
+
+| Сигнал | Звідки | Куди |
+|---|---|---|
+| телеметрія | GPIO14, пін 8 (чекер ДЗ11 TX) | GPIO5, пін 29 (наш RX) |
+| CONTROL | GPIO4, пін 7 (наш TX) | GPIO15, пін 10 (чекер ДЗ11 RX) |
+| START | GPIO24, пін 18 | GPIO27, пін 13 |
+| DROP | GPIO23, пін 16 | GPIO22, пін 15 |
+
+`/dev/ttyAMA0` — порт чекера ДЗ11 (`dtparam=uart0=on`),
+`/dev/ttyAMA2` — наш порт (`dtoverlay=uart2`). Нумерація `ttyAMA*` на Pi 5 з RP1
+не збігається з тією, що в README ДЗ11 для старіших плат.
+
+```bash
+sudo ~/dz11/checker_pi_arm64 5 --hw --uart /dev/ttyAMA0 \
+     --gpiochip gpiochip0 --start-line 27 --drop-line 22 &
+./checker-linux-arm64 14550 &
+./build/homework_17/drone --uart /dev/ttyAMA2 --gpiochip gpiochip0 \
+     --start-line 24 --drop-line 23
+```
+
+### Результат: місія 5 (M5 cross, рухома ціль)
+
+Чекер ДЗ11 — балістика:
+
+```
+[checker] misiya 5 (M5 cross): ammo=VOG-17 alt=100 maxV=30 maxA=9 maxW=1.2 hitR=6.0
+[checker] DROP t=4.70 poz=(95.3,94.4) dir=0.87 v=30.0
+[checker] REZULTAT: HIT tsil=0 promah=0.76 m (hitR=6.0)
+```
+
+Чекер ДЗ17 — потік MAVLink:
+
+```
+================ ЗВІТ ЧЕКЕРА ================
+[PASS] Кадри MAVLink 2 приймаються          прийнято кадрів: 222
+[PASS] sysid/compid стабільні                      sysid=1 compid=1, чужих кадрів: 0
+[PASS] HEARTBEAT ~1 Гц                                    отримано 6, середній інтервал 1.01 с
+[PASS] GLOBAL_POSITION_INT >= 2 Гц                        отримано 107, середній інтервал 0.06 с
+[PASS] ATTITUDE >= 2 Гц                                   отримано 107, середній інтервал 0.06 с
+[PASS] time_boot_ms монотонний                    стрибків назад: 0
+[PASS] Координати валідні (діапазон, не нульові) невалідних кадрів: 0
+[PASS] Позиція узгоджена зі швидкістю порушень 0 із 14 вимірів
+[PASS] hdg відповідає напрямку руху   порушень 0 із 14 вимірів
+[PASS] Скид: команда надійшла і повторювалась до ACK спроб: 2 (перша навмисно втрачена)
+[PASS] Скид: повтор — та сама команда param5/6/7 збігаються
+[PASS] Скид: координати поруч із дроном у межах 500 м від позиції
+[PASS] Після ACK — тиша                          зайвих команд після ACK: 0
+=============================================
+Усі перевірки пройдено.
+```
+
+Місія 1 (M1 easy) — так само 13/13, HIT з промахом 0.40 м.
+
+Показово, що `GLOBAL_POSITION_INT` іде на 16 Гц (темп кадрів чекера ДЗ11), а
+HEARTBEAT тримає 1.01 с — окремий таймер у `Dz11Bridge` не залежить від частоти
+надходження телеметрії.
