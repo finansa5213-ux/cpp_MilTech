@@ -1,0 +1,15 @@
+# visible,x,y,distance_m,confidence
+# FPV is visible and confident, but never close enough for trigger.
+visible,x,y,distance_m,confidence
+true,180,250,95,0.82
+true,205,246,88,0.85
+true,235,242,79,0.88
+true,270,239,68,0.90
+true,310,236,57,0.91
+true,350,234,49,0.92
+true,390,236,43,0.91
+true,430,240,46,0.90
+true,470,245,55,0.88
+true,505,250,67,0.86
+true,535,255,81,0.84
+true,560,260,98,0.82
