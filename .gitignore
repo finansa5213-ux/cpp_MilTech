@@ -33,3 +33,4 @@ core.*
 Thumbs.db
 build/
 .cache/
+c_library_v2/
