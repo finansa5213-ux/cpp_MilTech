@@ -1,0 +1,48 @@
+name: homework_17
+
+on:
+  push:
+    branches: [ "homework_17" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++
+
+      - name: Clone MAVLink c_library_v2
+        run: git clone --depth 1 https://github.com/mavlink/c_library_v2.git
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build -j
+
+      - name: Unit tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Integration smoke test (5 retries without ACK)
+        run: |
+          python3 homework_17/tools/fake_checker.py --ack-on 0 --timeout 45 > checker.log 2>&1 &
+          sleep 1
+          ./build/homework_17/drone --target 400,300
+          sleep 3
+          cat checker.log
+          grep -q "COMMAND_LONG: 5" checker.log
+
+      - name: Integration smoke test (ACK on 2nd attempt)
+        run: |
+          python3 homework_17/tools/fake_checker.py --ack-on 2 --timeout 45 > checker2.log 2>&1 &
+          sleep 1
+          ./build/homework_17/drone --target 400,300
+          sleep 3
+          cat checker2.log
+          grep -q "COMMAND_LONG: 2" checker2.log
