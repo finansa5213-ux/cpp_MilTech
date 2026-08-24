@@ -1,0 +1,6 @@
+{
+  "cmake.configureOnOpen": false,
+  "cmake.automaticReconfigure": false,
+  "cmake.configureOnEdit": false,
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json"
+}
