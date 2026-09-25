@@ -31,3 +31,7 @@ add_subdirectory(demos/lesson_2_4/debug_probe)
 add_subdirectory(homework_15)
 add_subdirectory(homework_16)
 add_subdirectory(homework_17)
+
+# homework_18 — прошивка ESP32 (ESP-IDF), у загальну збірку свідомо не входить:
+# потребує тулчейна Xtensa. Збирається окремо:
+#   cd homework_18 && idf.py set-target esp32 && idf.py build
