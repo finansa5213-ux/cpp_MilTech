@@ -1,0 +1,31 @@
+[Unit]
+Description=Бортовий маршрутизатор каналів керування БПЛА (A: 433 МГц, B: LTE-тунель)
+Documentation=file:/usr/share/doc/uav_link/README.md
+After=network-online.target wg-quick@wg0.service
+Wants=network-online.target
+
+[Service]
+Type=exec
+ExecStart=/usr/local/bin/uav_link /etc/uav_link/uav_link.conf
+Restart=always
+RestartSec=2
+StartLimitIntervalSec=0
+
+# Маршрутизатор має віддавати кадри раніше за фонові задачі системи.
+# Реального часу не вимагаємо - подієва петля й так укладається в такт 20 мс,
+# а SCHED_FIFO на робочому стенді небезпечніший за користь від нього.
+Nice=-10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=0
+
+# Мінімальні права: потрібні лише послідовні порти, сокети й ICMP.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/run
+CapabilityBoundingSet=CAP_NET_RAW CAP_NET_ADMIN CAP_SYS_NICE
+AmbientCapabilities=CAP_NET_RAW
+
+[Install]
+WantedBy=multi-user.target

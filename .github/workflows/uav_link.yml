@@ -1,0 +1,29 @@
+name: uav_link
+
+on:
+  push:
+    paths:
+      - 'uav_link/**'
+      - '.github/workflows/uav_link.yml'
+  pull_request:
+    paths:
+      - 'uav_link/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: uav_link
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Налаштувати збірку
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Зібрати
+        run: cmake --build build -j
+
+      - name: Прогнати перевірки
+        run: ctest --test-dir build --output-on-failure
